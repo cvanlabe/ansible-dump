@@ -1,9 +1,11 @@
 # Ansible Cookbook Dump
 
-This project is a project that captures some Ansible work I did in the past and can reuse. **Do not** consider it as a fully fledged, super optimal, exemplary Ansible project.
+This project is a project that captures some Ansible work I did in the past and can reuse. 
+
+>**Do not** consider it as a fully fledged, super optimal, exemplary Ansible project.
 It's 2 years old and never updated. Today it enables me to take pieces I need them for other deployments without having to rethink them.
 
-The workbook was built for **Ubuntu 18.04 LTS**. Ubuntu 16.04 LTS does **not** work due to an older Python 3 version. Newer versions might work, but have never been tested.
+The workbook was built for **Ubuntu 18.04 LTS**. Ubuntu 16.04 LTS does **not** work due to an older Python 3 version. Newer versions _may_ work, but have never been tested.
 
 The rest of this documentation below is excerpts from previous documentation written.
 
