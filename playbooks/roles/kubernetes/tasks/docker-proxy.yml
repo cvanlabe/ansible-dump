@@ -1,0 +1,27 @@
+---
+- name: Create docker systemd config folder
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+  when: http_proxy is defined or https_proxy is defined
+
+- name: Configure proxy for Docker
+  template:
+    src: docker-http-proxy.conf.j2
+    dest: /etc/systemd/system/docker.service.d/https-proxy.conf
+  notify: restart docker
+  when: http_proxy is defined or https_proxy is defined
+
+- name: Configure the systemd driver for Docker as per best practices
+  template:
+    src: docker-daemon.json.j2
+    dest: /etc/docker/daemon.json
+  notify: restart docker
+
+# Forcing a restart in case the handlers don't run because of multiple
+# possible reasons, like the bootstrap user being deleted prior to the handlers running
+- name: Restart Docker, also issue daemon-reload to pick up config changes
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker

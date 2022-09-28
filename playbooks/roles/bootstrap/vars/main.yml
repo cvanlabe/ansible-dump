@@ -1,0 +1,14 @@
+---
+# Users we need on the servers as sysadmins
+
+users:
+  - name: cvanlabe
+    shell: "/bin/bash"
+    uid: 5001
+    state: present
+    groups:
+      - sudo
+      - docker
+    ssh-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB...
+ 

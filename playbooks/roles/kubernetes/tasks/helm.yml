@@ -1,0 +1,7 @@
+---
+- name: Install kubernetes helm
+  command: snap install helm --classic # Ansible 2.8 will have the snap module available. For now using command.
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+  tags: helm

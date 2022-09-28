@@ -1,0 +1,8 @@
+---
+- hosts: 
+    - k8smasters
+    - k8sworkers
+  become: yes
+  become_user: root
+  roles:
+    - common

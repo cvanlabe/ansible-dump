@@ -1,0 +1,7 @@
+---
+- include: docker.yml
+- include: docker-proxy.yml
+- include: snapd-proxy.yml
+- include: kubernetes.yml
+- include: kubernetes-init.yml
+- include: helm.yml

@@ -1,0 +1,24 @@
+---
+- name: install nfs server
+  action: apt pkg=nfs-kernel-server state=present update_cache=yes
+  tags:
+    -nfs
+
+- name: install nfs client
+  action: apt pkg=nfs-common state=present
+  tags:
+    -nfs
+
+- name: ensure nfs service is running (Ubuntu)
+  action: service name={{item}} state=started
+  tags:
+    - nfs
+  with_items:
+    - nfs-kernel-server
+
+- name: Define the NFS port
+  lineinfile:
+      path: /etc/default/nfs-kernel-server
+      regexp: 'RPCMOUNTDOPTS='
+      line: 'RPCMOUNTDOPTS="-p 33333"'
+  notify: restart NFS server

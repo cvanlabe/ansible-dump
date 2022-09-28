@@ -1,0 +1,20 @@
+---
+- name: Create snapd systemd config folder
+  file:
+    path: /etc/systemd/system/snapd.service.d/
+    state: directory
+  when: http_proxy is defined or https_proxy is defined
+
+- name: Configure proxy for snapd
+  template:
+    src: snapd-http-proxy.conf.j2
+    dest: /etc/systemd/system/snapd.service.d/https-proxy.conf
+  notify: restart snapd
+  when: http_proxy is defined or https_proxy is defined
+
+- name: Restart snapd, don't wait for the handlers
+  systemd:
+    name: snapd
+    state: restarted
+    daemon_reload: yes
+

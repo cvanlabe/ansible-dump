@@ -1,0 +1,22 @@
+---
+- name: Update package index list # Todo: make it platform independent
+  apt:
+    update_cache: yes
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+
+- name: Install base packages
+  package:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - git
+      - wget
+      - jq
+    state: present
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"

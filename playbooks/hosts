@@ -1,0 +1,26 @@
+[runon:children]
+k8smasters
+k8sworkers
+#nfsservers
+
+[k8smasters]
+k8s-node-1 ansible_host=10.31.160.52
+
+[k8sworkers]
+k8s-node-2 ansible_host=10.31.160.178
+k8s-node-3 ansible_host=10.31.160.141
+
+[nfsservers]
+#nfs-node-1 ansible_host=10.31.161.220
+
+[backupservers]
+backup-bru ansible_host=10.48.56.117
+
+[servers:children]
+runon
+backupservers
+
+[runon:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+

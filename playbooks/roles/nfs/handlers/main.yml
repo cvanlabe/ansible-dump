@@ -1,0 +1,6 @@
+---
+- name: restart NFS server
+  systemd:
+    name: nfs-kernel-server
+    state: restarted
+    daemon_reload: yes

@@ -1,0 +1,48 @@
+---
+- name: Create prereq user groups for later
+  group:
+    name: docker
+    gid: 999
+    state: present
+
+- name: Add Generic Ansible user 'sysuser'
+  user:
+    name: "{{sysuser.name}}"
+    comment: "{{sysuser.fullname}}"
+    groups: "{{ sysuser.groups if sysuser.groups is defined else '' }}"
+    append: yes
+    password: "{{sysuser.password}}"
+    state: "{{sysuser.state}}"
+    shell: "{{sysuser.shell}}"
+    uid: "{{sysuser.uid}}"
+  when: sysuser is defined
+
+- name: Set proper sudoers file
+  template:
+    src: sudoers.j2
+    dest: /etc/sudoers
+    validate: 'visudo -cf %s'
+    mode: 0440
+
+- name: Create Users
+  user:
+    name: "{{ item.0.name }}"
+    groups: "{{ item.1 }}"
+    append: yes
+    shell: "{{ item.0.shell }}"
+    state: "{{item.0.state}}"
+    uid: "{{item.0.uid}}"
+  with_subelements:
+    - "{{users}}"       # <- item.0
+    - groups      # <- item.1
+
+- name: Add SSH Authorized keys for users
+  authorized_key: user={{ item.0.name }} key="{{ item.1 }}"
+  with_subelements:
+    - "{{users}}"
+    - ssh-keys
+
+- include: packages.yml
+
+- debug:
+    msg: "OK! System bootstrapped... please now run any other playbooks as required!"

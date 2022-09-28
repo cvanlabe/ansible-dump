@@ -1,0 +1,31 @@
+---
+- name: Add Kubernetes' official GPG key
+  apt_key: 
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+
+- name: query debian distro
+  shell: lsb_release -cs
+  register: debian_distro
+
+- name: Add Kubernetes repo to apt
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+
+- name: Install version 1.16.2-00 of Kubernetes
+  package:
+    name: 
+      - kubelet=1.16.2-00
+      - kubeadm=1.16.2-00
+      - kubectl=1.16.2-00
+    update_cache: yes
+    state: present
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+
+

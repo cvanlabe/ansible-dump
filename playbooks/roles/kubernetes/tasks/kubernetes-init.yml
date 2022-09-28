@@ -1,0 +1,72 @@
+---
+- name: Disable swap
+  shell: swapoff -a
+  
+- name: Disable swap in /etc/fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '#\1'
+    backup: yes
+  tags: kube-init
+
+- name: Initialize kubeadm (Takes a while..grab coffee)
+  shell: kubeadm init --pod-network-cidr=192.168.0.0/16  # as per https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
+  args:
+    creates: /etc/kubeadm-join.sh
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+    no_proxy: "{{no_proxy}}"
+  register: kubeadm_out
+  when: "'k8smasters' in group_names"
+  tags: kube-init
+
+- name: Generate join token on the master node
+  shell: kubeadm token create --print-join-command
+  register: kubeadm_join_cmd
+  delegate_to: "{{ groups['k8smasters'][0] }}"
+
+- set_fact:
+    kubeadm_join: "{{ kubeadm_join_cmd.stdout }}"
+
+- debug: var=kubeadm_join
+
+- name: Store kubeadm join command
+  action: copy content="{{ kubeadm_join }}" dest="/etc/kubernetes/kubeadm-join.command"
+
+- name: Run kubeadm join
+  shell: "{{ kubeadm_join }} --ignore-preflight-errors=swap"
+
+- name: Start Kubelet
+  service: 
+    name: kubelet 
+    state: started 
+    enabled: yes
+  when: "'k8smasters' in group_names"
+  tags: kube-init
+
+- name: Enable a Container Network Interface (CNI)
+  shell: >
+    export KUBECONFIG=/etc/kubernetes/admin.conf ;
+    kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml ;
+    kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+    no_proxy: "{{no_proxy}}"
+  when: "'k8smasters' in group_names"
+  tags: kube-init
+
+- name: Allow pods to be scheduled on master (as this is a single cluster)
+  shell: >
+    export KUBECONFIG=/etc/kubernetes/admin.conf ;      
+    kubectl taint nodes --all node-role.kubernetes.io/master-
+  when: 
+    - taintmaster 
+    - "'k8smasters' in group_names"
+  register: taint_output
+  failed_when: 
+    - "'error: taint \"node-role.kubernetes.io/master:\" not found' not in taint_output.stderr and taint_output.rc > 1"
+  #ignore_errors: yes
+  tags: kube-init

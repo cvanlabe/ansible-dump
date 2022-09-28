@@ -1,0 +1,20 @@
+---
+- hosts: servers
+  vars_prompt:
+    - name: "bootstrap_user"
+      prompt: "What is the bootstrap username of your newly created server?"
+      default: root
+      private: no
+
+    - name: "bootstrap_password"
+      prompt: "What is the password of this user?"
+
+  become: yes
+  become_user: root
+  roles:
+    - bootstrap
+  vars:
+    ansible_ssh_user: "{{bootstrap_user}}"
+    ansible_ssh_pass: "{{bootstrap_password}}"
+
+

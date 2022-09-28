@@ -1,0 +1,28 @@
+---
+- name: Add Docker's official GPG key
+  apt_key: 
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+
+- name: query debian distro
+  shell: lsb_release -cs
+  register: debian_distro
+
+- name: Add Docker repo to apt
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{debian_distro.stdout}} stable"
+    state: present
+
+- name: Install latest version of Docker CE
+  package:
+    name: docker-ce=18.06.1~ce~3-0~ubuntu # For Kubernetes, needs supported version
+    update_cache: yes
+    state: present
+  environment:
+    http_proxy: "{{http_proxy}}"
+    https_proxy: "{{https_proxy}}"
+
+
